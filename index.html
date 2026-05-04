@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Quest Log">
+<meta name="theme-color" content="#1a0f00">
+<title>Quest Log · Darío</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Crimson+Pro:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --gold:#c9a84c;--gold-light:#e8c97a;--gold-dark:#8a6a1f;
+  --ink:#2a1f0e;--ink-light:#5a4a2e;
+  --emerald:#1a6b45;--emerald-light:#2a9c63;
+  --ruby-light:#c4293d;
+  --parchment:#f5f0e8;
+}
+html,body{height:100%;background:#1a1208}
+body{font-family:'Crimson Pro',Georgia,serif;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;min-height:100vh;padding:0}
+
+.app{width:100%;max-width:440px;min-height:100vh;background:#f9f5ee;display:flex;flex-direction:column}
+
+.header{background:var(--ink);padding:env(safe-area-inset-top,16px) 16px 16px;text-align:center;border-bottom:2px solid var(--gold-dark)}
+.header-title{font-family:'Cinzel',serif;color:var(--gold-light);font-size:20px;font-weight:600;letter-spacing:2px;text-transform:uppercase}
+.header-sub{color:var(--gold-dark);font-size:12px;margin-top:2px;letter-spacing:1px}
+
+.hero-card{background:linear-gradient(135deg,#1a0f00 0%,#2a1f0e 60%,#1a0f00 100%);padding:16px;display:flex;gap:14px;align-items:center;border-bottom:1px solid var(--gold-dark)}
+.hero-avatar{width:64px;height:64px;flex-shrink:0}
+.hero-avatar svg{width:64px;height:64px}
+.hero-info{flex:1;min-width:0}
+.hero-name{font-family:'Cinzel',serif;color:var(--gold-light);font-size:15px;font-weight:600}
+.hero-class{color:var(--gold-dark);font-size:12px;margin-top:1px}
+.hero-mood{font-size:11px;margin-top:4px;font-style:italic}
+.mood-happy{color:#2a9c63}.mood-neutral{color:#e8a020}.mood-sad{color:#c4293d}
+.xp-row{display:flex;align-items:center;gap:8px;margin-top:8px}
+.xp-bar-outer{flex:1;height:8px;background:rgba(255,255,255,0.1);border-radius:4px;border:0.5px solid var(--gold-dark);overflow:hidden}
+.xp-bar-inner{height:100%;background:var(--gold);border-radius:4px;transition:width .6s ease}
+.xp-label{color:var(--gold-dark);font-size:11px;white-space:nowrap}
+.hero-stats{display:flex;gap:10px;margin-top:6px}
+.stat-pill{background:rgba(201,168,76,0.12);border:0.5px solid var(--gold-dark);border-radius:20px;padding:2px 10px;font-size:11px;color:var(--gold);display:flex;align-items:center;gap:4px}
+.stat-dot{width:6px;height:6px;border-radius:50%}
+.dot-green{background:#2a9c63}.dot-amber{background:#e8a020}
+
+.tabs{display:flex;border-bottom:1px solid #d4c9b0;background:#f0ebe0}
+.tab{flex:1;padding:11px 4px;text-align:center;font-size:12px;font-family:'Cinzel',serif;color:#8a7a5a;cursor:pointer;border:none;background:none;border-bottom:2px solid transparent;transition:all .2s;letter-spacing:.5px}
+.tab.active{color:var(--ink);border-bottom:2px solid var(--gold)}
+
+.scroll-area{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.section{padding:12px}
+.section-title{font-family:'Cinzel',serif;font-size:10px;letter-spacing:1.5px;color:#8a7a5a;text-transform:uppercase;margin-bottom:8px;padding-bottom:4px;border-bottom:0.5px solid #d4c9b0}
+
+.quest-card{background:#fff;border:0.5px solid #d4c9b0;border-radius:10px;margin-bottom:8px;overflow:hidden;transition:border-color .2s}
+.quest-header{display:flex;align-items:center;gap:10px;padding:10px 12px}
+.quest-icon{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.quest-info{flex:1;min-width:0}
+.quest-name{font-size:14px;font-weight:500;color:#2a1f0e;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.quest-freq{font-size:11px;color:#8a7a5a;margin-top:1px}
+.quest-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0}
+.xp-badge{font-size:11px;font-family:'Cinzel',serif;color:var(--gold-dark);background:rgba(201,168,76,0.1);border:0.5px solid rgba(201,168,76,0.3);border-radius:20px;padding:1px 8px}
+.complete-btn{width:34px;height:34px;border-radius:50%;border:1.5px solid #c4b898;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#8a7a5a;font-size:14px;transition:all .2s;-webkit-tap-highlight-color:transparent}
+.complete-btn:active{transform:scale(0.92)}
+.complete-btn.done{border-color:#2a9c63;background:#2a9c63;color:#fff}
+
+.quest-progress{padding:0 12px 10px}
+.progress-track{height:5px;background:#ede8dc;border-radius:3px;overflow:hidden}
+.progress-fill{height:100%;border-radius:3px;transition:width .4s ease}
+.fill-green{background:#2a9c63}.fill-amber{background:#e8a020}.fill-red{background:#c4293d}
+.progress-label{display:flex;justify-content:space-between;font-size:10px;color:#8a7a5a;margin-top:3px}
+
+.optional-badge{font-size:10px;color:#2a5ab0;background:rgba(42,90,176,0.08);border:0.5px solid rgba(42,90,176,0.2);border-radius:20px;padding:1px 7px}
+
+.log-entry{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:0.5px solid #d4c9b0}
+.log-dot{width:8px;height:8px;border-radius:50%;background:#2a9c63;flex-shrink:0}
+.log-text{font-size:13px;color:#2a1f0e;flex:1}
+.log-time{font-size:11px;color:#8a7a5a}
+
+.logro-card{border:0.5px solid #d4c9b0;border-radius:10px;padding:10px 12px;margin-bottom:8px;background:#fff}
+.logro-name{font-size:13px;font-weight:500;color:#2a1f0e}
+.logro-desc{font-size:11px;color:#8a7a5a;margin-top:2px}
+.logro-tag{display:inline-block;margin-top:4px;font-size:9px;background:rgba(201,168,76,0.15);color:var(--gold-dark);border-radius:20px;padding:2px 8px;font-family:'Cinzel',serif}
+
+.empty-state{text-align:center;color:#8a7a5a;font-size:13px;padding:24px 0;font-style:italic}
+
+.view{display:none}.view.active{display:block}
+
+.toast{position:fixed;top:max(env(safe-area-inset-top,16px),16px);left:50%;transform:translateX(-50%) translateY(-80px);background:var(--ink);color:var(--gold-light);font-family:'Cinzel',serif;font-size:12px;padding:8px 16px;border-radius:20px;border:1px solid var(--gold-dark);white-space:nowrap;transition:transform .3s ease;pointer-events:none;z-index:999;letter-spacing:.5px}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+@media(prefers-color-scheme:dark){
+  .app{background:#1e1810}
+  .quest-card,.logro-card{background:#2a2218;border-color:#3a3020}
+  .tabs{background:#1e1810;border-color:#3a3020}
+  .tab{color:#8a7a5a}
+  .tab.active{color:var(--gold-light)}
+  .scroll-area{background:#1e1810}
+  .section-title{color:#6a5a3a;border-color:#3a3020}
+  .quest-name,.log-text,.logro-name{color:#e8e0cc}
+  .progress-track{background:#3a3020}
+  .log-entry,.logro-card{border-color:#3a3020}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="toast" id="toast"></div>
+
+  <div class="header">
+    <div class="header-title">⚔ Quest Log ⚔</div>
+    <div class="header-sub">Forja tu mejor versión</div>
+  </div>
+
+  <div class="hero-card">
+    <div class="hero-avatar">
+      <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="32" cy="52" rx="18" ry="10" fill="#1a3a6b"/>
+        <rect x="22" y="32" width="20" height="20" rx="4" fill="#2a5ab0"/>
+        <rect x="26" y="34" width="12" height="4" rx="2" fill="#c9a84c" opacity="0.7"/>
+        <circle cx="32" cy="24" r="12" fill="#c9a97a"/>
+        <path d="M20 22 Q32 10 44 22" fill="#2a1f0e" stroke="#c9a84c" stroke-width="1"/>
+        <rect x="28" y="12" width="8" height="4" rx="1" fill="#c9a84c"/>
+        <circle cx="28" cy="24" r="2" fill="#2a1f0e"/>
+        <circle cx="36" cy="24" r="2" fill="#2a1f0e"/>
+        <path d="M28 29 Q32 33 36 29" fill="none" stroke="#2a1f0e" stroke-width="1.5" stroke-linecap="round" id="hero-mouth"/>
+        <path d="M14 32 L14 44 Q14 48 18 50 L22 46 L22 32 Z" fill="#c9a84c" stroke="#8a6a1f" stroke-width="0.5"/>
+        <rect x="42" y="18" width="3" height="26" rx="1" fill="#aaa" stroke="#888" stroke-width="0.5"/>
+        <rect x="38" y="30" width="11" height="3" rx="1" fill="#c9a84c"/>
+        <circle cx="43.5" cy="18" r="2" fill="#c9a84c"/>
+      </svg>
+    </div>
+    <div class="hero-info">
+      <div class="hero-name">Darío el Constante</div>
+      <div class="hero-class" id="hero-class">Nivel 1 · Aprendiz de Hábitos</div>
+      <div class="hero-mood mood-neutral" id="hero-mood">Listo para comenzar su aventura...</div>
+      <div class="xp-row">
+        <div class="xp-bar-outer"><div class="xp-bar-inner" id="xp-bar" style="width:0%"></div></div>
+        <div class="xp-label" id="xp-label">0 XP</div>
+      </div>
+      <div class="hero-stats">
+        <div class="stat-pill"><div class="stat-dot dot-green"></div><span id="streak-label">Racha: 0d</span></div>
+        <div class="stat-pill"><div class="stat-dot dot-amber"></div><span id="week-label">Hoy: 0 XP</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('misiones')">Misiones</button>
+    <button class="tab" onclick="switchTab('bonus')">Bonus</button>
+    <button class="tab" onclick="switchTab('logro')">Logros</button>
+  </div>
+
+  <div class="scroll-area">
+
+    <div class="view active" id="view-misiones">
+      <div class="section">
+        <div class="section-title">Misiones principales · Ventana 7 días</div>
+
+        <div class="quest-card">
+          <div class="quest-header">
+            <div class="quest-icon" style="background:#e6f1fb">🚿</div>
+            <div class="quest-info"><div class="quest-name">Ducha</div><div class="quest-freq">Mín. 3 / 7 días · máx. 1/día</div></div>
+            <div class="quest-right"><div class="xp-badge">+20 XP</div><button class="complete-btn" id="btn-ducha" onclick="complete('ducha')">✓</button></div>
+          </div>
+          <div class="quest-progress"><div class="progress-track"><div class="progress-fill fill-amber" id="bar-ducha" style="width:0%"></div></div><div class="progress-label"><span id="lbl-ducha">0 / 3 esta semana</span><span id="max-ducha"></span></div></div>
+        </div>
+
+        <div class="quest-card">
+          <div class="quest-header">
+            <div class="quest-icon" style="background:#eaf3de">🦷</div>
+            <div class="quest-info"><div class="quest-name">Lavado de dientes</div><div class="quest-freq">Mín. 14 / 7 días · máx. 2/día</div></div>
+            <div class="quest-right"><div class="xp-badge">+10 XP</div><button class="complete-btn" id="btn-dientes" onclick="complete('dientes')">✓</button></div>
+          </div>
+          <div class="quest-progress"><div class="progress-track"><div class="progress-fill fill-amber" id="bar-dientes" style="width:0%"></div></div><div class="progress-label"><span id="lbl-dientes">0 / 14 esta semana</span><span id="max-dientes"></span></div></div>
+        </div>
+
+        <div class="quest-card">
+          <div class="quest-header">
+            <div class="quest-icon" style="background:#faeeda">🐱</div>
+            <div class="quest-info"><div class="quest-name">Arena de los gatos</div><div class="quest-freq">Mín. 7 / 7 días · máx. 1/día</div></div>
+            <div class="quest-right"><div class="xp-badge">+15 XP</div><button class="complete-btn" id="btn-gatos" onclick="complete('gatos')">✓</button></div>
+          </div>
+          <div class="quest-progress"><div class="progress-track"><div class="progress-fill fill-amber" id="bar-gatos" style="width:0%"></div></div><div class="progress-label"><span id="lbl-gatos">0 / 7 esta semana</span><span id="max-gatos"></span></div></div>
+        </div>
+
+        <div class="quest-card">
+          <div class="quest-header">
+            <div class="quest-icon" style="background:#eeedfe">🍽️</div>
+            <div class="quest-info"><div class="quest-name">Lavar la loza</div><div class="quest-freq">Mín. 7 / 7 días · máx. 1/día</div></div>
+            <div class="quest-right"><div class="xp-badge">+15 XP</div><button class="complete-btn" id="btn-loza" onclick="complete('loza')">✓</button></div>
+          </div>
+          <div class="quest-progress"><div class="progress-track"><div class="progress-fill fill-amber" id="bar-loza" style="width:0%"></div></div><div class="progress-label"><span id="lbl-loza">0 / 7 esta semana</span><span id="max-loza"></span></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="view" id="view-bonus">
+      <div class="section">
+        <div class="section-title">Misiones opcionales · Bonus XP</div>
+
+        <div class="quest-card">
+          <div class="quest-header">
+            <div class="quest-icon" style="background:#fbeaf0">🧹</div>
+            <div class="quest-info"><div class="quest-name">Barrer / aspirar</div><div class="quest-freq">Sin mínimo · máx. 1/día</div></div>
+            <div class="quest-right"><div class="optional-badge">bonus</div><div class="xp-badge">+25 XP</div><button class="complete-btn" id="btn-barrer" onclick="complete('barrer')">✓</button></div>
+          </div>
+        </div>
+
+        <div class="quest-card">
+          <div class="quest-header">
+            <div class="quest-icon" style="background:#e1f5ee">🧺</div>
+            <div class="quest-info"><div class="quest-name">Lavar ropa</div><div class="quest-freq">Sin mínimo · máx. 1/día</div></div>
+            <div class="quest-right"><div class="optional-badge">bonus</div><div class="xp-badge">+30 XP</div><button class="complete-btn" id="btn-ropa" onclick="complete('ropa')">✓</button></div>
+          </div>
+        </div>
+
+        <div class="quest-card">
+          <div class="quest-header">
+            <div class="quest-icon" style="background:#f0f8ff">🪟</div>
+            <div class="quest-info"><div class="quest-name">Limpiar superficies</div><div class="quest-freq">Sin mínimo · máx. 1/día</div></div>
+            <div class="quest-right"><div class="optional-badge">bonus</div><div class="xp-badge">+20 XP</div><button class="complete-btn" id="btn-limpiar" onclick="complete('limpiar')">✓</button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="view" id="view-logro">
+      <div class="section">
+        <div class="section-title">Logros desbloqueados</div>
+        <div id="logros-list"><div class="empty-state">Completá misiones para desbloquear logros...</div></div>
+        <div class="section-title" style="margin-top:16px">Historial de hoy</div>
+        <div id="log-list"><div class="empty-state">Nada aún hoy. ¡A las armas!</div></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const QUESTS={
+  ducha:  {name:'Ducha',           xp:20,min7:3, maxDay:1,icon:'🚿'},
+  dientes:{name:'Lavado de dientes',xp:10,min7:14,maxDay:2,icon:'🦷'},
+  gatos:  {name:'Arena de los gatos',xp:15,min7:7,maxDay:1,icon:'🐱'},
+  loza:   {name:'Lavar la loza',   xp:15,min7:7, maxDay:1,icon:'🍽️'},
+  barrer: {name:'Barrer / aspirar',xp:25,min7:0, maxDay:1,icon:'🧹'},
+  ropa:   {name:'Lavar ropa',      xp:30,min7:0, maxDay:1,icon:'🧺'},
+  limpiar:{name:'Limpiar superficies',xp:20,min7:0,maxDay:1,icon:'🪟'},
+};
+const LEVELS=[
+  {lvl:1,name:'Aprendiz de Hábitos',xp:100},
+  {lvl:2,name:'Escudero del Orden',xp:250},
+  {lvl:3,name:'Caballero Aseado',xp:500},
+  {lvl:4,name:'Paladín de la Rutina',xp:900},
+  {lvl:5,name:'Leyenda Viviente',xp:Infinity},
+];
+const LOGROS_DEF=[
+  {id:'first',  icon:'⚔',name:'Primera sangre',    desc:'Completaste tu primera misión',       check:s=>s.totalDone>=1},
+  {id:'streak3',icon:'🔥',name:'Racha de 3',        desc:'3 días con al menos una misión',      check:s=>s.streak>=3},
+  {id:'fullday',icon:'🏆',name:'Día completo',      desc:'Las 4 principales en un mismo día',   check:s=>s.fullDays>=1},
+  {id:'xp50',   icon:'💎',name:'Héroe limpio',      desc:'Acumulaste 50 XP',                    check:s=>s.totalXP>=50},
+  {id:'ducha3', icon:'🚿',name:'El Acuático',       desc:'3 duchas en 7 días',                  check:s=>(s.c7.ducha||0)>=3},
+  {id:'gatos7', icon:'🐾',name:'Guardián Felino',   desc:'7 limpiezas de arena',                check:s=>(s.c7.gatos||0)>=7},
+  {id:'dientes',icon:'✨',name:'Sonrisa de acero',  desc:'14 lavados de dientes en 7 días',     check:s=>(s.c7.dientes||0)>=14},
+  {id:'xp200',  icon:'👑',name:'Paladín',           desc:'Acumulaste 200 XP',                   check:s=>s.totalXP>=200},
+  {id:'streak7',icon:'🌟',name:'Semana legendaria', desc:'7 días de racha',                     check:s=>s.streak>=7},
+];
+
+let state=load();
+render();
+
+function todayKey(){const d=new Date();return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`}
+function load(){try{const r=localStorage.getItem('questlog_dario_v1');if(r)return JSON.parse(r);}catch(e){}return{totalXP:0,totalDone:0,streak:0,lastDay:null,fullDays:0,log:[],logros:[],history:[],today:null};}
+function save(){try{localStorage.setItem('questlog_dario_v1',JSON.stringify(state));}catch(e){}}
+
+function getToday(){
+  const k=todayKey();
+  if(!state.today||state.today.key!==k){if(state.today)state.history.push(state.today);state.today={key:k,done:{}};}
+  return state.today;
+}
+function get7(qid){
+  const now=Date.now(),seven=7*24*3600*1000,all=[...(state.history||[]),getToday()];
+  let c=0;for(const d of all){const t=new Date(d.key).getTime();if(now-t<=seven)c+=(d.done[qid]||0);}return c;
+}
+function complete(qid){
+  const q=QUESTS[qid],today=getToday(),done=today.done[qid]||0;
+  if(done>=q.maxDay){showToast('⚠ Límite diario alcanzado');return;}
+  today.done[qid]=done+1;state.totalXP+=q.xp;state.totalDone++;
+  const now=new Date();state.log=state.log||[];
+  state.log.unshift({text:q.name,icon:q.icon,time:now.toLocaleTimeString('es-UY',{hour:'2-digit',minute:'2-digit'}),xp:q.xp});
+  if(state.log.length>20)state.log.pop();
+  updateStreak();checkFullDay();checkLogros();save();render();
+  showToast(`+${q.xp} XP · ¡${q.name} completada!`);
+}
+function updateStreak(){
+  const k=todayKey();if(state.lastDay===k)return;
+  const d=new Date();d.setDate(d.getDate()-1);const yk=`${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+  state.streak=state.lastDay===yk?state.streak+1:1;state.lastDay=k;
+}
+function checkFullDay(){
+  const today=getToday();const main=['ducha','dientes','gatos','loza'];
+  const full=main.every(q=>(today.done[q]||0)>=1);
+  if(full&&!today.fullCounted){today.fullCounted=true;state.fullDays=(state.fullDays||0)+1;}
+}
+function checkLogros(){
+  const c7={};Object.keys(QUESTS).forEach(k=>c7[k]=get7(k));
+  const s={totalDone:state.totalDone,streak:state.streak,fullDays:state.fullDays||0,totalXP:state.totalXP,c7};
+  state.logros=state.logros||[];
+  for(const l of LOGROS_DEF){if(!state.logros.includes(l.id)&&l.check(s))state.logros.push(l.id);}
+}
+function getLevel(){let prev=0;for(const l of LEVELS){if(state.totalXP<l.xp)return{...l,prevXP:prev};prev=l.xp;}return{...LEVELS[LEVELS.length-1],prevXP:LEVELS[LEVELS.length-2].xp};}
+function weekPct(){let tot=0,done=0;for(const[k,q]of Object.entries(QUESTS)){if(q.min7>0){tot+=q.min7;done+=Math.min(get7(k),q.min7);}}return tot>0?done/tot:0;}
+
+function render(){
+  const lv=getLevel();const xpRange=lv.xp===Infinity?9999:lv.xp-lv.prevXP;const xpIn=state.totalXP-lv.prevXP;
+  const pct=Math.min(100,Math.round(xpIn/xpRange*100));
+  document.getElementById('xp-bar').style.width=pct+'%';
+  document.getElementById('xp-label').textContent=state.totalXP+' XP';
+  document.getElementById('hero-class').textContent=`Nivel ${lv.lvl} · ${lv.name}`;
+  document.getElementById('streak-label').textContent=`Racha: ${state.streak}d`;
+  const todayXP=(state.log||[]).reduce((s,e)=>s+(e.xp||0),0);
+  document.getElementById('week-label').textContent=`Hoy: ${todayXP} XP`;
+  const p=weekPct();const hm=document.getElementById('hero-mood');
+  if(p>=0.8){hm.className='hero-mood mood-happy';hm.textContent='✨ El héroe irradia virtud y determinación.';}
+  else if(p>=0.4){hm.className='hero-mood mood-neutral';hm.textContent='⚔ El héroe está listo para la batalla.';}
+  else{hm.className='hero-mood mood-sad';hm.textContent='😔 El héroe necesita recuperarse...';}
+  Object.keys(QUESTS).forEach(qid=>{
+    const q=QUESTS[qid],today=getToday(),doneToday=today.done[qid]||0,done7=get7(qid);
+    const bar=document.getElementById('bar-'+qid);
+    if(bar){const p7=q.min7>0?Math.min(100,Math.round(done7/q.min7*100)):0;bar.style.width=p7+'%';bar.className='progress-fill '+(p7>=100?'fill-green':p7>=50?'fill-amber':'fill-red');}
+    const lbl=document.getElementById('lbl-'+qid);if(lbl)lbl.textContent=`${done7} / ${q.min7||'∞'} esta semana`;
+    const mx=document.getElementById('max-'+qid);if(mx)mx.textContent=doneToday>=q.maxDay?'✓ Máx. hoy':`${doneToday}/${q.maxDay} hoy`;
+    const btn=document.getElementById('btn-'+qid);if(btn)btn.className='complete-btn'+(doneToday>=q.maxDay?' done':'');
+  });
+  renderLogros();renderLog();
+}
+function renderLogros(){
+  const el=document.getElementById('logros-list');const unlocked=state.logros||[];
+  if(!unlocked.length){el.innerHTML='<div class="empty-state">Completá misiones para desbloquear logros...</div>';return;}
+  el.innerHTML=unlocked.map(id=>{const l=LOGROS_DEF.find(x=>x.id===id);if(!l)return'';
+    return`<div class="logro-card"><div class="logro-name">${l.icon} ${l.name}</div><div class="logro-desc">${l.desc}</div><span class="logro-tag">✓ desbloqueado</span></div>`;}).join('');
+}
+function renderLog(){
+  const el=document.getElementById('log-list');const log=(state.log||[]).slice(0,8);
+  if(!log.length){el.innerHTML='<div class="empty-state">Nada aún hoy. ¡A las armas!</div>';return;}
+  el.innerHTML=log.map(e=>`<div class="log-entry"><div class="log-dot"></div><div class="log-text">${e.icon} ${e.text}</div><div class="log-time">+${e.xp} XP · ${e.time}</div></div>`).join('');
+}
+function switchTab(tab){
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',['misiones','bonus','logro'][i]===tab));
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+tab).classList.add('active');
+}
+let toastTimer;
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2200);}
+</script>
+</body>
+</html>
